@@ -27,6 +27,55 @@ const runCommand = (command, options) => {
   });
 };
 
+app.post("/test", (req, res) => {
+  const testCase = req.files.testCase;
+  const fileName = testCase?.name;
+  const execName = fileName.split(".")[0];
+  testCase.mv(
+    path.join(__dirname, `../testCases/${execName}.zip`),
+    async (err) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: err });
+      }
+      const result = await fs
+        .createReadStream(path.join(__dirname, `../testCases/${execName}.zip`))
+        .pipe(
+          unzipper.Extract({
+            path: path.join(__dirname, "../autotester/tests"),
+          })
+        )
+        .promise();
+      console.log("Initiating Preparing Testcases");
+      fs.readFile(
+        `../autotester/tests/${execName}.js`,
+        "utf-8",
+        (err, data) => {
+          if (err) {
+            console.log("Error reading uploaded file:", err);
+            return res.status(500).send("Error reading uploaded file");
+          }
+          fs.writeFile(
+            `../autotester/cypress/e2e/evaluate.cy.js`,
+            data,
+            "utf-8",
+            (err) => {
+              if (err) {
+                console.log("Error replacing file:", err);
+                return res.status(500).send("Error replacing file");
+              }
+              console.log("File replaced successfully");
+              return res
+                .status(200)
+                .json({ message: "File uploaded and replaced" });
+            }
+          );
+        }
+      );
+    }
+  );
+});
+
 app.post("/upload", (req, res) => {
   const zipFile = req.files.zipFile;
   const fileName = zipFile?.name;
@@ -123,7 +172,7 @@ app.post("/upload", (req, res) => {
         //Create a kill promise that resolves or rejects based on the npmKilPromise
         console.log("Kill localhost terminal.");
         const killerPromise = new Promise((resolve, reject) => {
-          const npmKillPromise = runCommand("npx cypress run", {
+          const npmKillPromise = runCommand("Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess | Stop-Process -Force ", {
             cwd: path.join(__dirname, `../autotester`),
           });
 
@@ -158,7 +207,7 @@ app.post("/upload", (req, res) => {
         return res.status(200).json(data);
       };
 
-      setTimeout(fetchData, 50000);
+      setTimeout(fetchData, 40000);
     } catch (error) {
       console.log(error);
       return res.status(400).json(err);

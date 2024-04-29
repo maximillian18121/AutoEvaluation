@@ -6,7 +6,4 @@ describe('template spec', () => {
     it('Testcase 2', () => {
       cy.get("[data-test='header-2']").contains(/This is second test Case/i);
     })
-    it('Testcase 3', () => {
-      cy.get("[data-test='header-3']").contains(/This is third test Case/i);
-    })
   })
