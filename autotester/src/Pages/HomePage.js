@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
-import ProgressBar from "../Components/ProgressBar";
-import LoadingSpinner from "../Components/LoadingSpinner";
-import ResultTable from "../Components/ResultTable";
+import TestingPage from "../Components/TestingPage";
 
 const HomePage = () => {
   const [file, setFile] = useState(null);
   const [msg, setMsg] = useState("");
+  let [etoggle, setEToggle] = useState(false);
+  let [utoggle, setUToggle] = useState(false);
   const [progress, setProgress] = useState({
     started: false,
     pc: 0,
@@ -17,8 +17,15 @@ const HomePage = () => {
   const [results, setResults] = useState([]);
   const [tests, setTests] = useState(null);
 
+  const utogFun = () => {
+    setUToggle(!utoggle);
+  };
+  const etogFun = () => {
+    setEToggle(!etoggle);
+  };
+
   const handleFileChange = (e) => {
-    // console.log(e.target.files); 
+    // console.log(e.target.files);
     setFile(e.target.files[0]);
     setProgress((prev) => {
       return { ...prev, started: false, pc: 0 };
@@ -83,7 +90,7 @@ const HomePage = () => {
   };
 
   const handleFileUpload = async () => {
-    if(!tests){
+    if (!tests) {
       setProgress((prev) => {
         return { ...prev, started: false, pc: 0, show: false };
       });
@@ -110,7 +117,7 @@ const HomePage = () => {
               ...prevState,
               pc: ProgressEvent.progress * 100,
               started: true,
-              show:false
+              show: false,
             };
           });
           if (ProgressEvent.progress * 100 === 100) {
@@ -119,7 +126,7 @@ const HomePage = () => {
                 ...prevState,
                 started: false,
                 loading: true,
-                show:false
+                show: false,
               };
             });
             setMsg("Upload Succesfull and processing results");
@@ -153,45 +160,40 @@ const HomePage = () => {
         <div className="header-section">
           <div className="heading">Upload Zip File</div>
         </div>
-        <div className="main-section">
-          <div className="input-section">
-            <div className="first-section">
-              <h4>Choose Testcase file</h4>
-              <input
-                type="file"
-                className="main-input"
-                placeholder="choose testcases"
-                onChange={(e) => {
-                  handleTestsChange(e);
-                }}
-              />
-            </div>
-            <div className="second-section">
-              <h4>Choose Solution file</h4>
-              <input
-                type="file"
-                className="main-input"
-                onChange={(e) => handleFileChange(e)}
-              />
-            </div>
-          </div>
+        <div className="testing-area">
           <div className="btn-container">
-          <button className="main-button" onClick={handleTestsSubmit}>
-            Set TestCase
-          </button>
-          <button className="main-button" onClick={handleFileUpload}>
-            Start Testing
-          </button>
+            <button className="main-button" onClick={etogFun}>
+              End to End Testing with Cypress
+            </button>
+            <button className="main-button" onClick={utogFun}>
+              Unit Testing with JEST
+            </button>
           </div>
-          {progress.started && <ProgressBar value={progress.pc} />}
-          {!progress.started && progress.loading && <LoadingSpinner />}
-          <h2>{msg}</h2>
-          {progress.show && (
-            <div>
-              <ResultTable results={results} />
-            </div>
-          )}
         </div>
+        {etoggle && (
+          <TestingPage
+            handleTestsChange={handleTestsChange}
+            handleFileChange={handleFileChange}
+            handleTestsSubmit={handleTestsSubmit}
+            handleFileUpload={handleFileUpload}
+            progress={progress}
+            results={results}
+            msg={msg}
+            text=" Cypress"
+          />
+        )}
+        {utoggle && (
+          <TestingPage
+            handleTestsChange={handleTestsChange}
+            handleFileChange={handleFileChange}
+            handleTestsSubmit={handleTestsSubmit}
+            handleFileUpload={handleFileUpload}
+            progress={progress}
+            results={results}
+            msg={msg}
+            text=" JEST"
+          />
+        )}
       </div>
     </>
   );
