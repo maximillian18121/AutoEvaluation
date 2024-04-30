@@ -156,18 +156,6 @@ app.post("/upload", (req, res) => {
           console.error("Error in cypress testing on app:", error.message);
         }
 
-        // await runCommand("npx cypress run", {
-        //   cwd: path.join(__dirname, `../autotester`),
-        // });
-        // console.log("Cypress tests executed successfully");
-
-        // // Run PowerShell command to stop process on port 3000
-        // await runCommand(
-        //   "Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess | Stop-Process -Force",
-        //   {shell:"powershell"},
-        //   {cwd:"../backend"}
-        // );
-        // console.log("Process on port 3000 stopped");
 
         //Create a kill promise that resolves or rejects based on the npmKilPromise
         console.log("Kill localhost terminal.");
@@ -222,70 +210,3 @@ app.listen(port, () => {
   console.log(`server is live at port ${port}`);
 });
 
-/*
- exec(
-        "npm install",
-        { cwd: path.join(__dirname, `../autotester/fetchFolder/${execName}`) },
-        (err, stdout, stderr) => {
-          if (err) {
-            console.log("Error Installing dependencies:", stderr);
-            return;
-          }
-          console.log("stdout",stdout);
-          console.log("Dependencies installed successfully");
-          console.log("Starting executing app on localhost ...");
-
-          exec(
-            "npm start",
-            {
-              cwd: path.join(
-                __dirname,
-                `../autotester/fetchFolder/${execName}`
-              ),
-            },
-            (err, stdout, stderr) => {
-              if(err||stderr){
-                console.log(err,stderr);
-                return;
-              }
-              //console.log(err, stderr, stdout);
-              //console.log("stdout",stdout);
-              console.log("App successfully ran on localhost");
-              console.log("Executing tests on react app");
-
-              exec(
-                "npx cypress run",
-                { cwd: "../autotester" },
-                (error, stdout, stderr) => {
-                  
-                  console.log("Text executed successfully");
-                  console.log("Process of fetching result started");
-                  resultData = JSON.parse(
-                    fs.readFileSync("../autotester/results.json", "utf-8")
-                  );
-                  console.log(resultData);
-                  const {
-                    "cypress\\e2e\\evaluate.cy.js": testResults,
-                    totals: { suites, tests, failed, passed, pending, skipped },
-                  } = resultData;
-                  data = [
-                    { testResults },
-                    { suites, tests, failed, passed, pending, skipped },
-                  ];
-
-                  exec(
-                    "Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess | Stop-Process -Force",
-                    { shell:'powershell' },
-                    (err, stderr, stdout) => {
-                      //console.log("stdout",stdout);
-                      console.log("Test execution ended successfully");
-                    }
-                  );
-                  return res.status(200).json(data);
-                }
-              );
-            }
-          );
-        }
-      );
- */

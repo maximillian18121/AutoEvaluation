@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import axios from "axios";
 import TestingPage from "../Components/TestingPage";
+import axios from 'axios';
 
 const HomePage = () => {
   const [file, setFile] = useState(null);
