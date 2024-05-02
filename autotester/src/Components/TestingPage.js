@@ -2,6 +2,7 @@ import React from "react";
 import ProgressBar from "./ProgressBar";
 import ResultTable from "./ResultTable";
 import LoadingSpinner from "./LoadingSpinner";
+import JestResultTable from "./JestResultTable";
 
 const TestingPage = ({
   handleTestsChange,
@@ -50,9 +51,10 @@ const TestingPage = ({
         <h2>{msg}</h2>
         {progress.show && (
           <div>
-            <ResultTable results={results} />
+            {text === " Cypress" ? <ResultTable results={results} />: <JestResultTable results={results}/> }
+           
           </div>
-        )}
+        )} 
       </div>
     </>
   );

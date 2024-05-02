@@ -1,22 +1,46 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import TestingPage from "../Components/TestingPage";
-import axios from 'axios';
+import axios from "axios";
 
 const HomePage = () => {
+
+  // state variable for storing zip file
   const [file, setFile] = useState(null);
+  const [jestFile,setJestFile] = useState(null);
+
+  // message to show lifecycle of process.
   const [msg, setMsg] = useState("");
+  const [jestMsg,setJestMsg] = useState("");
+
+  // toggle variable for executing two different tests.
   let [etoggle, setEToggle] = useState(false);
   let [utoggle, setUToggle] = useState(false);
+
+  // state variable showing different status for file uploading process
   const [progress, setProgress] = useState({
     started: false,
     pc: 0,
     loading: false,
     show: false,
   });
-  const [results, setResults] = useState([]);
-  const [tests, setTests] = useState(null);
 
+  const [jestProgress,setJestProgress] = useState({
+    started: false,
+    pc: 0,
+    loading: false,
+    show: false,
+  })
+
+  // state variable for storing value of incoming result after evaluating file from backend.
+  const [results, setResults] = useState([]);
+  const [jestResults,setJestResults] = useState([]);
+
+  // state variable for storing testcase file.
+  const [tests, setTests] = useState(null);
+  const [jetTests,setJestTests] = useState(null);
+
+  // toggling functions for opening modal for cypress and jest testing.
   const utogFun = () => {
     setUToggle(!utoggle);
   };
@@ -24,6 +48,7 @@ const HomePage = () => {
     setEToggle(!etoggle);
   };
 
+  // function for storing th zip file when we select the file by clicking on select file
   const handleFileChange = (e) => {
     // console.log(e.target.files);
     setFile(e.target.files[0]);
@@ -32,12 +57,30 @@ const HomePage = () => {
     });
   };
 
+  const handleJestFileChange = (e) => {
+    setJestFile(e.target.files[0]);
+    setJestProgress((prev)=>{
+      return {...prev,started:false, pc:0};
+    });
+  }
+
+  // function for storing the zip file when we select the file by clicking on select testcase file
+
   const handleTestsChange = (e) => {
     setTests(e.target.files[0]);
     setProgress((prev) => {
       return { ...prev, started: false, pc: 0 };
     });
   };
+
+  const handleJestTestsChange = (e) => {
+    setJestTests(e.target.files[0]);
+    setJestProgress((prev)=>{
+      return {...prev, started:false, pc:0};
+    });
+  }
+
+  // function for setting tetcase after uploading them in our root folder structure.
 
   const handleTestsSubmit = async (e) => {
     if (!tests) {
@@ -88,6 +131,61 @@ const HomePage = () => {
       setMsg(error);
     }
   };
+
+  const handleJestTestsSubmit = async(e) => {
+
+    if(!jetTests){
+      setJestProgress((prev) => {
+        return { ...prev, started: false, pc: 0 };
+      });
+      setJestMsg("Please select a zip file for testcase");
+      toast.error("No file selected");
+      return;
+    }
+    let formData = new FormData();
+    formData.append('jestTestCase',jetTests);
+    setJestMsg("Uploading test file");
+
+    try {
+      await axios.post("http://localhost:5000/jestTest", formData, {
+        onUploadProgress: (ProgressEvent) => {
+          setJestProgress((prevState) => {
+            return {
+              ...prevState,
+              pc: ProgressEvent.progress * 100,
+              started: true,
+            };
+          });
+          if (ProgressEvent.progress * 100 === 100) {
+            setJestProgress((prevState) => {
+              return {
+                ...prevState,
+                started: false,
+                loading: true,
+              };
+            });
+            setJestMsg("Upload Succesfull and preparing testcase");
+          }
+        },
+        headers: {
+          "Content-Type": "application/x-zip-compressed",
+        },
+      });
+      setJestProgress((prevState) => {
+        return {
+          ...prevState,
+          loading: false,
+          show: true,
+        };
+      });
+      setJestMsg("TestCase built Successfully");
+    } catch (error) {
+      setJestMsg(error);
+    }
+  }
+
+  // function for generating testing results.
+
 
   const handleFileUpload = async () => {
     if (!tests) {
@@ -154,6 +252,75 @@ const HomePage = () => {
       console.log(error);
     }
   };
+
+  const handleJestFileUpload = async() => {
+    if (!jetTests) {
+      setJestProgress((prev) => {
+        return { ...prev, started: false, pc: 0, show: false };
+      });
+      setJestMsg("Please select a test file for project");
+      toast.error("No test file selected");
+      return;
+    }
+    if (!jestFile) {
+      setJestProgress((prev) => {
+        return { ...prev, started: false, pc: 0, show: false };
+      });
+      setJestMsg("Please select a zip file for project");
+      toast.error("No file selected");
+      return;
+    }
+
+    let formData = new FormData();
+    formData.append("zipJestFile", jestFile);
+    setJestMsg("Processing ...");
+    try {
+      const res = await axios.post("http://localhost:5000/jestUpload", formData, {
+        onUploadProgress: (ProgressEvent) => {
+          setJestProgress((prevState) => {
+            return {
+              ...prevState,
+              pc: ProgressEvent.progress * 100,
+              started: true,
+              show: false,
+            };
+          });
+          if (ProgressEvent.progress * 100 === 100) {
+            setJestProgress((prevState) => {
+              return {
+                ...prevState,
+                started: false,
+                loading: true,
+                show: false,
+              };
+            });
+            setJestMsg("Upload Succesfull and processing results");
+          }
+        },
+        headers: {
+          "Content-Type": "application/x-zip-compressed",
+        },
+      });
+      setJestProgress((prevState) => {
+        return {
+          ...prevState,
+          loading: false,
+          show: true,
+        };
+      });
+      const result = await res.data;
+      setJestMsg("Test Executed Successfully");
+      setJestResults((prevState) => {
+        return [result];
+      });
+      console.log(1, result);
+    } catch (error) {
+      setJestMsg(error);
+      console.log(error);
+    }
+  }
+
+
   return (
     <>
       <div className="main-container">
@@ -184,13 +351,13 @@ const HomePage = () => {
         )}
         {utoggle && (
           <TestingPage
-            handleTestsChange={handleTestsChange}
-            handleFileChange={handleFileChange}
-            handleTestsSubmit={handleTestsSubmit}
-            handleFileUpload={handleFileUpload}
-            progress={progress}
-            results={results}
-            msg={msg}
+            handleTestsChange={handleJestTestsChange}
+            handleFileChange={handleJestFileChange}
+            handleTestsSubmit={handleJestTestsSubmit}
+            handleFileUpload={handleJestFileUpload}
+            progress={jestProgress}
+            results={jestResults}
+            msg={jestMsg}
             text=" JEST"
           />
         )}

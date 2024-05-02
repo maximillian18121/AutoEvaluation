@@ -8,7 +8,7 @@ const { exec } = require("child_process");
 // const runApp = require("./utils");
 const app = express();
 const port = 5000;
-
+let jestExecName = "";
 app.use(cors());
 app.use(fileUpload());
 let data = [];
@@ -72,6 +72,33 @@ app.post("/test", (req, res) => {
           );
         }
       );
+    }
+  );
+});
+
+// controller for setting testcases.
+app.post("/jestTest", (req, res) => {
+  const testCase = req.files.jestTestCase;
+  const fileName = testCase?.name;
+  const execName = fileName.split(".")[0];
+  jestExecName = execName;
+  testCase.mv(
+    path.join(__dirname, `../testCases/${execName}.zip`),
+    async (err) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: err });
+      }
+      const result = await fs
+        .createReadStream(path.join(__dirname, `../testCases/${execName}.zip`))
+        .pipe(
+          unzipper.Extract({
+            path: path.join(__dirname, "../autotester/tests"),
+          })
+        )
+        .promise();
+      console.log("Initiating Preparing Testcases");
+      return res.status(200).json({ message: "File uploaded and replaced" });
     }
   );
 });
@@ -156,13 +183,15 @@ app.post("/upload", (req, res) => {
           console.error("Error in cypress testing on app:", error.message);
         }
 
-
         //Create a kill promise that resolves or rejects based on the npmKilPromise
         console.log("Kill localhost terminal.");
         const killerPromise = new Promise((resolve, reject) => {
-          const npmKillPromise = runCommand("Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess | Stop-Process -Force ", {
-            cwd: path.join(__dirname, `../autotester`),
-          });
+          const npmKillPromise = runCommand(
+            "Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess | Stop-Process -Force ",
+            {
+              cwd: path.join(__dirname, `../autotester`),
+            }
+          );
 
           npmKillPromise.then(resolve).catch(reject);
         });
@@ -202,6 +231,133 @@ app.post("/upload", (req, res) => {
     }
   });
 });
+
+// controller for generatin test results for jest testing.
+
+app.post("/jestUpload", (req, res) => {
+  const zipFile = req.files.zipJestFile;
+  const fileName = zipFile?.name;
+  const execName = fileName.split(".")[0];
+
+  zipFile.mv(path.join(__dirname, `../db/${execName}.zip`), async (err) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json({ error: err });
+    }
+    try {
+      const result = await fs
+        .createReadStream(path.join(__dirname, `../db/${execName}.zip`))
+        .pipe(
+          unzipper.Extract({
+            path: path.join(__dirname, "../autotester/fetchFolder"),
+          })
+        )
+        .promise();
+      console.log(result);
+      console.log("Initiating node modules installation");
+
+      // exec start
+
+      const main = async () => {
+        // executing npm install
+        await runCommand("npm install", {
+          cwd: path.join(__dirname, `../autotester/fetchFolder/${execName}`),
+        });
+        console.log("Dependencies installed successfully");
+
+        // Set a timeout using Promise.race
+        const timeoutPromise = new Promise((resolve, reject) => {
+          setTimeout(() => {
+            reject(
+              new Error("Command execution timed out. Terminating the process.")
+            );
+          }, 30000); // 30 seconds
+        });
+
+        // writing content of app.test.js file
+        fs.readFile(
+          `../autotester/tests/${jestExecName}.js`,
+          "utf-8",
+          (err, data) => {
+            if (err) {
+              console.log("Error reading uploaded file:", err);
+            }
+            fs.writeFile(
+              `../autotester/fetchFolder/${execName}/src/App.test.js`,
+              data,
+              "utf-8",
+              (err) => {
+                if (err) {
+                  console.log("Error replacing file:", err);
+                }
+                console.log("File replaced successfully");
+              }
+            );
+          }
+        );
+
+        //Create a kill promise that resolves or rejects based on the npmKilPromise
+        console.log("Running Jest testing on Uploaded Folder ...");
+        const runnerPromise = new Promise((resolve, reject) => {
+          const npmTestPromise = runCommand("npm run test", {
+            cwd: path.join(__dirname, `../autotester/fetchFolder/${execName}`),
+          });
+
+          npmTestPromise.then(resolve).catch(reject);
+        });
+
+        try {
+          // Use Promise.race to wait for either npmStartPromise or timeoutPromise to settle
+          await Promise.race([runnerPromise, timeoutPromise]);
+          console.log("Generating Jest results");
+        } catch (error) {
+          console.error("Error running tests:", error.message);
+        }
+
+        // retreiving data from file
+
+        const fetchData = () => {
+          const jsonData = JSON.parse(
+            fs.readFileSync(`../autotester/fetchFolder/${execName}/test-result.json`,'utf-8')
+          );
+          const { numFailedTests, numPassedTests, numTotalTests, testResults } =
+            jsonData;
+
+          const newTestResults = testResults[0]?.assertionResults.map(
+            (result) => {
+              const { status, title } = result;
+              if (result.failureMessages.length === 0) {
+                result.failureMessages[0] = "TestCase passed Successfully";
+              } else {
+                const failMessage = result.failureMessages[0];
+                result.failureMessages[0] = failMessage?.split(".")[0]?.split("TestingLibraryElementError:")[1];
+              }
+              return {
+                title,
+                status,
+                verdict: result.failureMessages[0],
+              };
+            }
+          );
+
+          const resData = [
+            { numTotalTests, numPassedTests, numFailedTests },
+           [ ...newTestResults],
+          ];
+          console.log(resData);
+          return res.status(200).json(resData);
+        };
+
+        setTimeout(fetchData, 20000);
+      };
+      await main();
+    } catch (error) {
+      console.log(error);
+      return res.status(400).json(err);
+    }
+  });
+});
+
 app.get("/", (req, res) => {
   res.json({ message: "Hello World" });
 });
@@ -209,4 +365,3 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`server is live at port ${port}`);
 });
-
