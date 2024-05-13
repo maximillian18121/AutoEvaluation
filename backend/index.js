@@ -340,10 +340,19 @@ app.post("/jestUpload", (req, res) => {
             }
           );
 
-          const resData = [
+          let resData = [
             { numTotalTests, numPassedTests, numFailedTests },
            [ ...newTestResults],
           ];
+
+          if(numTotalTests === 0 && numPassedTests === 0 && numFailedTests === 0 && newTestResults.length === 0){
+             
+            const errorSentence = testResults[0]?.message;
+            const fIdx = errorSentence.search("SyntaxError");
+            const newMsg = errorSentence.slice(fIdx,300+fIdx).split(")\n")[0];
+            resData = [ { numTotalTests, numPassedTests, numFailedTests },
+              [newMsg],]
+          }
           console.log(resData);
           return res.status(200).json(resData);
         };

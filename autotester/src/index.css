@@ -63,6 +63,17 @@ code {
 .main-button{
   margin-right: 5rem;
   margin-top: 1rem;
+  border: none;
+  background-color: rgb(241, 108, 108);
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.main-button:hover{
+ background-color: rgb(242, 65, 29);
+ cursor: pointer;
 }
 
 .loading-spinner-container {
@@ -129,4 +140,56 @@ code {
   flex-direction: row;
   justify-content: center;
   align-items: center;
+}
+
+.error-section{
+  text-align: center;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: rgb(249, 242, 242);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-item {
+  color: rgb(16, 16, 16);
+  text-decoration: none;
+  padding: 0.2rem;
+  transition: background-color 0.3s ease;
+}
+
+.nav-item:hover {
+  color: #f50d0d;
+}
+
+@media screen and (max-width: 600px) {
+  .navbar {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .nav-item {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.button-test{
+  border: none;
+  background-color:  rgb(249, 242, 242);
+  cursor: pointer;
+  text-transform: capitalize;
+  font-weight: bolder;
+}
+
+.test-description{
+  font-weight: lighter;
+  font-size: 20px;
 }

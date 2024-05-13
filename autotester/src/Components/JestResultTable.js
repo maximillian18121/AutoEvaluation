@@ -13,6 +13,17 @@ const JestResultTable = ({results}) => {
     const testData = resultStats[1];
     console.log(1,testData);
 
+    if(numTotalTests === 0 && numPassedTests === 0 && numFailedTests === 0){
+      return (
+        <>
+        <div className='error-section'>
+          <h2 className='error-title'>Test suite failed to run: Jest encountered an unexpected token</h2>
+          <h4 className='error-message'>{testData[0]}</h4>
+        </div>
+        </>
+      )
+    } 
+
   return (
     <div className="table-container">
       <table className="table">

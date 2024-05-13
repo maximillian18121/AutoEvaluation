@@ -42,10 +42,12 @@ const HomePage = () => {
 
   // toggling functions for opening modal for cypress and jest testing.
   const utogFun = () => {
-    setUToggle(!utoggle);
+    setUToggle((prev)=>true);
+    setEToggle((prev)=>false);
   };
   const etogFun = () => {
-    setEToggle(!etoggle);
+    setEToggle((prev)=>true);
+    setUToggle((prev)=>false);
   };
 
   // function for storing th zip file when we select the file by clicking on select file
@@ -323,19 +325,14 @@ const HomePage = () => {
 
   return (
     <>
+     <div className="navbar">
+          <h3 className="nav-item">AutoEvaluation</h3>
+          <button className="nav-item button-test" onClick={utogFun}> Unit Testing with Jest</button>
+          <button className="nav-item button-test" onClick={etogFun}>End to End Testing with Cypress</button>
+        </div>
       <div className="main-container">
         <div className="header-section">
-          <div className="heading">Upload Zip File</div>
-        </div>
-        <div className="testing-area">
-          <div className="btn-container">
-            <button className="main-button" onClick={etogFun}>
-              End to End Testing with Cypress
-            </button>
-            <button className="main-button" onClick={utogFun}>
-              Unit Testing with JEST
-            </button>
-          </div>
+          <div className="heading">Upload ZIP File</div>
         </div>
         {etoggle && (
           <TestingPage
@@ -346,7 +343,8 @@ const HomePage = () => {
             progress={progress}
             results={results}
             msg={msg}
-            text=" Cypress"
+            text="End to End Testing of Javascript web applications using Cypress Testing Library"
+            symbol=" Cypress"
           />
         )}
         {utoggle && (
@@ -358,7 +356,8 @@ const HomePage = () => {
             progress={jestProgress}
             results={jestResults}
             msg={jestMsg}
-            text=" JEST"
+            text="Unit Testing of Javascript web application using Jest Testing Library"
+            symbol=" Jest"
           />
         )}
       </div>

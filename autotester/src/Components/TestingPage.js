@@ -12,14 +12,16 @@ const TestingPage = ({
   progress,
   results,
   msg,
-  text
+  text,
+  symbol
 }) => {
   return (
     <>
       <div className="main-section">
+      <div className="test-description">{text}</div>
         <div className="input-section">
           <div className="first-section">
-            <h4>{`Choose Testcase file${text}`}</h4>
+            <h4>{`Choose Testcase file`}</h4>
             <input
               type="file"
               className="main-input"
@@ -51,7 +53,7 @@ const TestingPage = ({
         <h2>{msg}</h2>
         {progress.show && (
           <div>
-            {text === " Cypress" ? <ResultTable results={results} />: <JestResultTable results={results}/> }
+            {symbol === " Cypress" ? <ResultTable results={results} />: <JestResultTable results={results}/> }
            
           </div>
         )} 

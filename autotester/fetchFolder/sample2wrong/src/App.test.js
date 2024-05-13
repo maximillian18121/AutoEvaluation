@@ -9,7 +9,7 @@ test('Testcase - 1', () => {
 
 test('Testcase - 2', () => {
   render(<App />);
-  const linkElement = screen.getByText(/This is second test Case/i);
+  const linkElement = screen.getByText(/This is secnd test Case/i);
   expect(linkElement).toBeInTheDocument();
 });
 

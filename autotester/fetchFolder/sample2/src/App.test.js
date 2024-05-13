@@ -9,7 +9,12 @@ test('Testcase - 1', () => {
 
 test('Testcase - 2', () => {
   render(<App />);
-  const linkElement = screen.getByText(/This is secnd test Case/i);
+  const linkElement = screen.getByText(/This is second test Case/i);
   expect(linkElement).toBeInTheDocument();
 });
 
+test('Testcase - 3', () => {
+  render(<App />);
+  const linkElement = screen.getByText(/This is third test Case/i);
+  expect(linkElement).toBeInTheDocument();
+});

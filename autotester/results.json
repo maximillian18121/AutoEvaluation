@@ -1,13 +1,14 @@
 {
   "cypress\\e2e\\evaluate.cy.js": {
     "template spec Testcase 1": "passed",
-    "template spec Testcase 2": "passed"
+    "template spec Testcase 2": "passed",
+    "template spec Testcase 3": "passed"
   },
   "totals": {
     "suites": 1,
-    "tests": 2,
+    "tests": 3,
     "failed": 0,
-    "passed": 2,
+    "passed": 3,
     "pending": 0,
     "skipped": 0
   }
