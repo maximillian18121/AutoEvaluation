@@ -2,8 +2,15 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import TestingPage from "../Components/TestingPage";
 import axios from "axios";
+import { useSelector,useDispatch } from "react-redux";
+import { setIsLog } from "../feature/logSlice";
 
 const HomePage = () => {
+
+
+  const dispatch = useDispatch();
+  const {isLog} = useSelector((store)=>store.logState);
+  console.log(isLog);
 
   // state variable for storing zip file
   const [file, setFile] = useState(null);
@@ -15,7 +22,7 @@ const HomePage = () => {
 
   // toggle variable for executing two different tests.
   let [etoggle, setEToggle] = useState(false);
-  let [utoggle, setUToggle] = useState(false);
+  let [utoggle, setUToggle] = useState(true);
 
   // state variable showing different status for file uploading process
   const [progress, setProgress] = useState({
@@ -297,6 +304,7 @@ const HomePage = () => {
               };
             });
             setJestMsg("Upload Succesfull and processing results");
+            dispatch(setIsLog(true));
           }
         },
         headers: {

@@ -3,6 +3,8 @@ import ProgressBar from "./ProgressBar";
 import ResultTable from "./ResultTable";
 import LoadingSpinner from "./LoadingSpinner";
 import JestResultTable from "./JestResultTable";
+import LogDashBoard from "./LogDashBoard";
+import { useSelector } from "react-redux";
 
 const TestingPage = ({
   handleTestsChange,
@@ -15,6 +17,9 @@ const TestingPage = ({
   text,
   symbol
 }) => {
+
+  const {isLog} = useSelector((store)=>store.logState);
+
   return (
     <>
       <div className="main-section">
@@ -51,6 +56,7 @@ const TestingPage = ({
         {progress.started && <ProgressBar value={progress.pc} />}
         {!progress.started && progress.loading && <LoadingSpinner />}
         <h2>{msg}</h2>
+        {isLog&&<LogDashBoard/>}
         {progress.show && (
           <div>
             {symbol === " Cypress" ? <ResultTable results={results} />: <JestResultTable results={results}/> }

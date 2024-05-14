@@ -193,3 +193,29 @@ body {
   font-weight: lighter;
   font-size: 20px;
 }
+
+.dashboard {
+  padding: 20px;
+  background-color: #f0f0f0;
+}
+
+.dashboard-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.logs-container {
+  border: 1px solid #ccc;
+  padding: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.log-item {
+  margin-bottom: 8px;
+  padding: 8px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
