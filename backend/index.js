@@ -5,12 +5,28 @@ const express = require("express");
 const cors = require("cors");
 const unzipper = require("unzipper");
 const { exec } = require("child_process");
+const http = require('http');
+const {WebSocket,WebSocketServer} = require('ws');
+
 // const runApp = require("./utils");
 const app = express();
+
+// web socket instance and creating a websocket connection
+// Create an HTTP server and a WebSocket server
+const server = http.createServer();
+const wsServer = new WebSocketServer({ server });
+
+wsServer.on("connection",(socket)=>{
+  console.log("welocme to new user");
+});
+
 const port = 5000;
 let jestExecName = "";
 app.use(cors());
 app.use(fileUpload());
+
+
+
 let data = [];
 let resultData = [];
 
@@ -374,3 +390,7 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`server is live at port ${port}`);
 });
+
+server.listen(8080,()=>{
+  console.log('websocket server initiated at port 8080');
+})
